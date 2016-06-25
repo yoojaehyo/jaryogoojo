@@ -693,6 +693,8 @@ void SHP(Profile* P, int num){
     if(P==NULL) return;
 
     if(curr>0){
+        cout << endl;
+        cout << P->name << " : " << num << endl;
         Adj* B=new Adj;
         B->data=P;
         B->next=NULL;
@@ -709,13 +711,14 @@ void SHP(Profile* P, int num){
             Adj* A;
             for(A=S_P, i=1; A->next!=NULL ;i++, A=A->next);
 
-            if(i==5){
+            if(i==5)
                 delete B;
-                return;
-            }
+            
+            else
+                A->next=B;
             P->from=M_HEAP[0]->from;
-            A->next=B;
             P->d=num;
+            
         }
     }
 
@@ -933,6 +936,13 @@ void free_foa(Node* O){
     O->P->foa=0;
     free_foa(O->right);
     free_foa(O->left);
+}
+
+void free_d(Node* O){
+    if(O==NULL) return;
+    O->P->d=-1;
+    free_d(O->left);
+    free_d(O->right);
 }
 
 bool is_digits(const string &str){
@@ -1207,9 +1217,10 @@ int main(){
         }
 
         else if(m==9){
+            free_d(Prof);
             cout<< "Enter a word: ";
             getline(cin, name);
-            cout<< "\nTop 5 Shortest path from " << name <<endl;
+            cout<< "\nShortest path from " << name <<endl;
 
             hsize=1000; curr=0;
             Node* O=search_p_s(Prof,name);
