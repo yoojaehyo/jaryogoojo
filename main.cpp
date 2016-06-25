@@ -17,16 +17,9 @@ void insert_case2(Node* n);
 void insert_case3(Node* n);
 void insert_case4(Node* n);
 void insert_case5(Node* n);
-void delete_case1(Node* n);
-void delete_case2(Node* n);
-void delete_case3(Node* n);
-void delete_case4(Node* n);
-void delete_case5(Node* n);
-void delete_case6(Node* n);
 void delete_case11(Node* n);
 void delete_case12(Node* n);
 void delete_case13(Node* n);
-void delete_case14(Node* n);
 void rotate_left(Node* n);
 void rotate_right(Node* n);
 
@@ -36,6 +29,7 @@ int topnum;
 
 typedef struct adj{
     Profile* data;
+    int weight; // for shortest path
     string date;
     struct adj* next;
 } Adj;
@@ -57,6 +51,7 @@ typedef struct profiles{
     Adj* friends;
     Adj* friended;
     Adjw* tweets;
+    struct profiles* from; //used for shortest path
 } Profile; //Profile of user
 
 typedef struct words{
@@ -82,214 +77,7 @@ Adj* FOA=NULL; //Friends of All people found in question 3
 
 void find_root(){
     while(Prof!=NULL && Prof->parent!=NULL)
-        Prof=Prof->parent;Node* sibling(Node* n){
-    if(n->parent!=NULL)
-        if(n==n->parent->left)
-            return n->parent->right;
-        else
-            return n->parent->left;
-    return NULL;
-}
-
-void delete_one(Node* n){
-    Node* N=NULL;
-    if(n->right!=NULL)
-        for(N=n->right;N->left!=NULL;N=N->left);
-    else if(n->left!=NULL)
-        for(N=n->left;N->right!=NULL;N=N->right);
-
-    if(N!=NULL){
-        n->P=N->P;
-        n->W=N->W;
-    }
-    else N=n;
-
-    if(N->left!=NULL || N->right!=NULL){
-        Node* child=(N->right==NULL)? N->left : N->right;
-        child->parent = N->parent;
-        if(N==N->parent->left)
-            N->parent->left=child;
-        else
-            N->parent->right=child; //replacing child into N
-
-        if(N->color == BLACK){
-            if(child->color == RED)
-                child->color = BLACK;
-            else
-                delete_case1(child);
-        }
-    }
-
-    else if(N->color==BLACK)
-        delete_case11(N); // N is doubly blacked
-
-    if(N->parent->left==N)
-        N->parent->left=NULL;
-    else if(N->parent->right==N)
-        N->parent->right=NULL;
-
-    delete N;
-    find_root();
-}
-
-void delete_case11(Node* n){
-    Node* s=sibling(n);
-    if(s->color==RED)
-        delete_case13(n);
-    else if(n->parent->left==n &&
-       s->right!=NULL){
-        s->color=n->parent->color;
-        n->parent->color=BLACK;
-        s->right->color=BLACK;
-        rotate_left(s->parent);
-    }
-    else if(n->parent->right==n &&
-            s->left!=NULL){
-        s->color=n->parent->color;
-        n->parent->color=BLACK;void delete_case6(Node* n);
-        s->left->color=BLACK;
-        rotate_right(s->parent);
-    }
-    else
-        delete_case12(n);
-}
-
-void delete_case12(Node* n){
-    Node* s=sibling(n);
-    if(n->parent->left==n &&
-       s->left!=NULL){
-        s->left->color=BLACK;
-        s->color=RED;
-        rotate_right(s);
-        delete_case11(n);
-    }
-    else if(n->parent->right==n &&
-       s->right!=NULL){
-        s->right->color=BLACK;
-        s->color=RED;
-        rotate_left(s);
-        delete_case11(n);
-    }
-    else
-        s->color=RED;
-}
-
-void delete_case13(Node* n){
-    Node* s=sibling(n);
-    if(n==n->parent->left){
-        s->color=BLACK;
-        s->left->color=RED;
-        rotate_left(n->parent);
-    }
-    else{
-        s->color=BLACK;
-        s->right->color=RED;
-        rotate_right(n->parent);
-    }
-
-    s=sibling(n);
-    if(s->left!=NULL || s->right!=NULL)
-        delete_case14(n);
-}
-
-void delete_case14(Node* n){
-    Node* s=sibling(n);
-    if(n==n->parent->left &&
-       s->left!=NULL){
-        rotate_right(s);
-        rotate_left(n->parent);
-    }
-    else if(n==n->parent->right &&
-            s->right!=NULL){
-        rotate_left(s);
-        rotate_right(n->parent);
-    }
-    sibling(n->parent)->color=BLACK;
-}
-
-void delete_case1(Node* n){
-    if(n->parent==NULL)
-        delete_case2(n);
-}
-
-void delete_case2(Node* n){
-    Node* s = sibling(n);
-
-    if(s->color==RED){
-        n->parent->color = RED;
-        s->color = BLACK;
-        if(n==n->parent->left)
-            rotate_left(n->parent);
-        else
-            rotate_right(n->parent);
-    }
-    delete_case3(n);
-}
-
-void delete_case3(Node* n){
-    Node* s = sibling(n);
-
-    if(n->parent->color==BLACK &&
-       s->color==BLACK &&
-       s->left->color==BLACK &&
-       s->right->color==BLACK){
-        s->color=RED;
-        delete_case1(n->parent);
-    }
-    else
-        delete_case4(n);
-}
-
-void delete_case4(Node* n){
-    Node* s = sibling(n);
-
-    if(n->parent->color==RED &&
-       s->color==BLACK &&
-       s->left->color==BLACK &&
-       s->right->color==BLACK){
-        s->color = RED;
-        n->parent->color = BLACK;
-    }
-    else
-        delete_case5(n);
-}
-
-void delete_case5(Node* n){
-    Node* s = sibling(n);
-    if(s->color==BLACK){
-        if(n==n->parent->left &&
-           s->right->color==BLACK &&
-           s->left->color==RED){
-            s->color=RED;
-            s->left->color=BLACK;
-            rotate_right(s);
-        }
-        else if(n==n->parent->right &&
-                s->left->color==BLACK &&
-                s->right->color==RED){
-            s->color=RED;
-            s->right->color=BLACK;
-            rotate_left(s);
-        }
-    }
-    delete_case6(n);
-}
-
-void delete_case6(Node* n){
-    Node* s=sibling(n);
-
-    s->color=n->parent->color;
-    n->parent->color=BLACK;
-
-    if(n==n->parent->left){
-        s->right->color=BLACK;
-        rotate_left(n->parent);
-    }
-    else{
-        s->left->color=BLACK;
-        rotate_right(n->parent);
-    }
-}
+        Prof=Prof->parent;
     while(Wo!=NULL && Wo->parent!=NULL)
         Wo=Wo->parent;
 }
@@ -317,7 +105,7 @@ void insert_case1(Node *n)
 {
     if(n->parent==NULL)
         n->color=BLACK;
-    if(n->parent!=NULL)
+    else
         insert_case2(n);
 }
 
@@ -423,6 +211,7 @@ Node* sibling(Node* n){
 
 void delete_one(Node* n){
     Node* N=NULL;
+
     if(n->right!=NULL)
         for(N=n->right;N->left!=NULL;N=N->left);
     else if(n->left!=NULL)
@@ -431,401 +220,92 @@ void delete_one(Node* n){
     if(N!=NULL){
         n->P=N->P;
         n->W=N->W;
+        n=N;
     }
-    else N=n;
 
-    if(N->left!=NULL || N->right!=NULL){
-        Node* child=(N->right==NULL)? N->left : N->right;
-        child->parent = N->parent;
-        if(N==N->parent->left)
-            N->parent->left=child;
+    if(n->left!=NULL || n->right!=NULL){ //only 1 child -> n=BLACK
+        Node* child=(n->right==NULL)? n->left : n->right;
+        child->parent = n->parent;
+        if(n==n->parent->left)
+            n->parent->left=child;
         else
-            N->parent->right=child; //replacing child into N
+            n->parent->right=child; //replacing child into N
 
-        if(N->color == BLACK){
-            if(child->color == RED)
-                child->color = BLACK;
-            else
-                delete_case1(child);
-        }
+        child->color = BLACK; // child was red.... their sibling do not exist
     }
 
-    else if(N->color==BLACK)
-        delete_case11(N); // N is doubly blacked
+    else if(n->color==BLACK)
+        delete_case11(n); // N is doubly blacked
 
-    if(N->parent->left==N)
-        N->parent->left=NULL;
-    else if(N->parent->right==N)
-        N->parent->right=NULL;
+    if(n->parent->left==n)
+        n->parent->left=NULL;
+    else if(n->parent->right==n)
+        n->parent->right=NULL;
 
-    delete N;
+    delete n;
+    n=NULL;
+
     find_root();
+}
+
+int node_color(Node* n){
+    return n==NULL? BLACK : n->color;
 }
 
 void delete_case11(Node* n){
     Node* s=sibling(n);
+
     if(s->color==RED)
-        delete_case13(n);
-    else if(n->parent->left==n &&
-       s->right!=NULL){
-        s->color=n->parent->color;
-        n->parent->color=BLACK;
-        s->right->color=BLACK;
-        rotate_left(s->parent);
-    }
-    else if(n->parent->right==n &&
-            s->left!=NULL){
-        s->color=n->parent->color;
-        n->parent->color=BLACK;void delete_case6(Node* n);
-        s->left->color=BLACK;
-        rotate_right(s->parent);
-    }
+        delete_case13(n); // if node's sibling is RED
+
+    else if(node_color(s->left)==RED || node_color(s->right)==RED){
+        if(n==n->parent->left){
+            if(node_color(s->right)==RED){
+                s->right->color=BLACK;
+                rotate_left(n->parent);
+            }
+            else{
+                s->left->color=BLACK;
+                rotate_right(s);
+                rotate_left(n->parent);
+            }
+        }
+        else{
+            if(node_color(s->left)==RED){
+                s->left->color=BLACK;
+                rotate_right(n->parent);
+            }
+            else{
+                s->right->color=BLACK;
+                rotate_left(s);
+                rotate_right(n->parent);
+            }
+        }
+    } // if node have red child
+
     else
         delete_case12(n);
 }
 
 void delete_case12(Node* n){
     Node* s=sibling(n);
-    if(n->parent->left==n &&
-       s->left!=NULL){
-        s->left->color=BLACK;
-        s->color=RED;
-        rotate_right(s);
-        delete_case11(n);
-    }
-    else if(n->parent->right==n &&
-       s->right!=NULL){
-        s->right->color=BLACK;
-        s->color=RED;
-        rotate_left(s);
-        delete_case11(n);
-    }
-    else
-        s->color=RED;
-}
 
-void delete_case13(Node* n){
-    Node* s=sibling(n);
-    if(n==n->parent->left){
-        s->color=BLACK;
-        s->left->color=RED;
-        rotate_left(n->parent);
-    }
-    else{
-        s->color=BLACK;Node* sibling(Node* n){
-    if(n->parent!=NULL)
-        if(n==n->parent->left)
-            return n->parent->right;
-        else
-            return n->parent->left;
-    return NULL;
-}
-
-void delete_one(Node* n){
-    Node* N=NULL;
-    if(n->right!=NULL)
-        for(N=n->right;N->left!=NULL;N=N->left);
-    else if(n->left!=NULL)
-        for(N=n->left;N->right!=NULL;N=N->right);
-
-    if(N!=NULL){
-        n->P=N->P;
-        n->W=N->W;
-    }
-    else N=n;
-
-    if(N->left!=NULL || N->right!=NULL){
-        Node* child=(N->right==NULL)? N->left : N->right;
-        child->parent = N->parent;
-        if(N==N->parent->left)
-            N->parent->left=child;
-        else
-            N->parent->right=child; //replacing child into N
-
-        if(N->color == BLACK){
-            if(child->color == RED)
-                child->color = BLACK;
-            else
-                delete_case1(child);
-        }
-    }
-
-    else if(N->color==BLACK)
-        delete_case11(N); // N is doubly blacked
-
-    if(N->parent->left==N)
-        N->parent->left=NULL;
-    else if(N->parent->right==N)
-        N->parent->right=NULL;
-
-    delete N;
-    find_root();
-}
-
-void delete_case11(Node* n){
-    Node* s=sibling(n);
-    if(s->color==RED)
-        delete_case13(n);
-    else if(n->parent->left==n &&
-       s->right!=NULL){
-        s->color=n->parent->color;
+    s->color=RED;
+    if(n->parent->color==RED)
         n->parent->color=BLACK;
-        s->right->color=BLACK;
-        rotate_left(s->parent);
-    }
-    else if(n->parent->right==n &&
-            s->left!=NULL){
-        s->color=n->parent->color;
-        n->parent->color=BLACK;void delete_case6(Node* n);
-        s->left->color=BLACK;
-        rotate_right(s->parent);
-    }
-    else
-        delete_case12(n);
-}
-
-void delete_case12(Node* n){
-    Node* s=sibling(n);
-    if(n->parent->left==n &&
-       s->left!=NULL){
-        s->left->color=BLACK;
-        s->color=RED;
-        rotate_right(s);
-        delete_case11(n);
-    }
-    else if(n->parent->right==n &&
-       s->right!=NULL){
-        s->right->color=BLACK;
-        s->color=RED;
-        rotate_left(s);
-        delete_case11(n);
-    }
-    else
-        s->color=RED;
+    else if(grandparent(n)!=NULL)
+        delete_case11(n->parent);
 }
 
 void delete_case13(Node* n){
     Node* s=sibling(n);
-    if(n==n->parent->left){
-        s->color=BLACK;
-        s->left->color=RED;
+    s->color=BLACK;
+    n->parent->color=RED;
+    if(n==n->parent->left)
         rotate_left(n->parent);
-    }
-    else{
-        s->color=BLACK;
-        s->right->color=RED;
-        rotate_right(n->parent);
-    }
-
-    s=sibling(n);
-    if(s->left!=NULL || s->right!=NULL)
-        delete_case14(n);
-}
-
-void delete_case14(Node* n){
-    Node* s=sibling(n);
-    if(n==n->parent->left &&
-       s->left!=NULL){
-        rotate_right(s);
-        rotate_left(n->parent);
-    }
-    else if(n==n->parent->right &&
-            s->right!=NULL){
-        rotate_left(s);
-        rotate_right(n->parent);
-    }
-    sibling(n->parent)->color=BLACK;
-}
-
-void delete_case1(Node* n){
-    if(n->parent==NULL)
-        delete_case2(n);
-}
-
-void delete_case2(Node* n){
-    Node* s = sibling(n);
-
-    if(s->color==RED){
-        n->parent->color = RED;
-        s->color = BLACK;
-        if(n==n->parent->left)
-            rotate_left(n->parent);
-        else
-            rotate_right(n->parent);
-    }
-    delete_case3(n);
-}
-
-void delete_case3(Node* n){
-    Node* s = sibling(n);
-
-    if(n->parent->color==BLACK &&
-       s->color==BLACK &&
-       s->left->color==BLACK &&
-       s->right->color==BLACK){
-        s->color=RED;
-        delete_case1(n->parent);
-    }
     else
-        delete_case4(n);
-}
-
-void delete_case4(Node* n){
-    Node* s = sibling(n);
-
-    if(n->parent->color==RED &&
-       s->color==BLACK &&
-       s->left->color==BLACK &&
-       s->right->color==BLACK){
-        s->color = RED;
-        n->parent->color = BLACK;
-    }
-    else
-        delete_case5(n);
-}
-
-void delete_case5(Node* n){
-    Node* s = sibling(n);
-    if(s->color==BLACK){
-        if(n==n->parent->left &&
-           s->right->color==BLACK &&
-           s->left->color==RED){
-            s->color=RED;
-            s->left->color=BLACK;
-            rotate_right(s);
-        }
-        else if(n==n->parent->right &&
-                s->left->color==BLACK &&
-                s->right->color==RED){
-            s->color=RED;
-            s->right->color=BLACK;
-            rotate_left(s);
-        }
-    }
-    delete_case6(n);
-}
-
-void delete_case6(Node* n){
-    Node* s=sibling(n);
-
-    s->color=n->parent->color;
-    n->parent->color=BLACK;
-
-    if(n==n->parent->left){
-        s->right->color=BLACK;
-        rotate_left(n->parent);
-    }
-    else{
-        s->left->color=BLACK;
         rotate_right(n->parent);
-    }
-}
-        s->right->color=RED;
-        rotate_right(n->parent);
-    }
-
-    s=sibling(n);
-    if(s->left!=NULL || s->right!=NULL)
-        delete_case14(n);
-}
-
-void delete_case14(Node* n){
-    Node* s=sibling(n);
-    if(n==n->parent->left &&
-       s->left!=NULL){
-        rotate_right(s);
-        rotate_left(n->parent);
-    }
-    else if(n==n->parent->right &&
-            s->right!=NULL){
-        rotate_left(s);
-        rotate_right(n->parent);
-    }
-    sibling(n->parent)->color=BLACK;
-}
-
-void delete_case1(Node* n){
-    if(n->parent==NULL)
-        delete_case2(n);
-}
-
-void delete_case2(Node* n){
-    Node* s = sibling(n);
-
-    if(s->color==RED){
-        n->parent->color = RED;
-        s->color = BLACK;
-        if(n==n->parent->left)
-            rotate_left(n->parent);
-        else
-            rotate_right(n->parent);
-    }
-    delete_case3(n);
-}
-
-void delete_case3(Node* n){
-    Node* s = sibling(n);
-
-    if(n->parent->color==BLACK &&
-       s->color==BLACK &&
-       s->left->color==BLACK &&
-       s->right->color==BLACK){
-        s->color=RED;
-        delete_case1(n->parent);
-    }
-    else
-        delete_case4(n);
-}
-
-void delete_case4(Node* n){
-    Node* s = sibling(n);
-
-    if(n->parent->color==RED &&
-       s->color==BLACK &&
-       s->left->color==BLACK &&
-       s->right->color==BLACK){
-        s->color = RED;
-        n->parent->color = BLACK;
-    }
-    else
-        delete_case5(n);
-}
-
-void delete_case5(Node* n){
-    Node* s = sibling(n);
-    if(s->color==BLACK){
-        if(n==n->parent->left &&
-           s->right->color==BLACK &&
-           s->left->color==RED){
-            s->color=RED;
-            s->left->color=BLACK;
-            rotate_right(s);
-        }
-        else if(n==n->parent->right &&
-                s->left->color==BLACK &&
-                s->right->color==RED){
-            s->color=RED;
-            s->right->color=BLACK;
-            rotate_left(s);
-        }
-    }
-    delete_case6(n);
-}
-
-void delete_case6(Node* n){
-    Node* s=sibling(n);
-
-    s->color=n->parent->color;
-    n->parent->color=BLACK;
-
-    if(n==n->parent->left){
-        s->right->color=BLACK;
-        rotate_left(n->parent);
-    }
-    else{
-        s->left->color=BLACK;
-        rotate_right(n->parent);
-    }
+    delete_case11(n);
 }
 
 // inserting Profile's node
@@ -854,6 +334,8 @@ void insert_p(string user, string date, string name){
     no->P->friended=NULL;
 
     no->P->tweets=NULL;
+
+    no->P->from=NULL;
 
     no->parent=NULL;
     no->right=NULL;
@@ -890,9 +372,21 @@ void delete_p(Node* O){
 
     Profile* p;
 
-    for(a=O->P->friended ; a!=NULL ; a=O->P->friended){
-        O->P->friended=O->P->friended->next;
-        delete a;
+    for(a=O->P->friended ; a!=NULL ; ){
+        prev=NULL;
+        for(b=a->data->friends ; ; prev=b,b=b->next)
+            if(b->data==O->P) break;
+
+        if(prev==NULL)
+            a->data->friends=b->next;
+        else
+            prev->next=b->next;
+
+        delete b;
+
+        prev=a;
+        a=a->next;
+        delete prev;
     }
 
     for(a=O->P->friends ; a!=NULL ; ){
@@ -916,14 +410,20 @@ void delete_p(Node* O){
     Adjw* prevw;
     for(c=O->P->tweets ; c!=NULL ; ){
         prev=NULL;
-        for(b=c->data->tweeters ; ; prev=b,b=b->next)
+        for(b=c->data->tweeters ; ; prev=b, b=b->next )
             if(b->data==O->P) break;
 
         if(prev==NULL)
             c->data->tweeters=b->next;
         else
             prev->next=b->next;
-        delete b;
+
+        prev=b;
+        b=b->next;
+        delete prev;
+
+        c->data->tweeted--;
+
 
         prevw=c;
         c=c->next;
@@ -943,6 +443,8 @@ void delete_p(Node* O){
     } // delete profile from FOA
 
     delete O->P;
+    O->P=NULL;
+
     if(Prof->right==NULL && Prof->left==NULL){
         delete Prof;
         Prof=NULL;
@@ -993,9 +495,9 @@ void insert_friend(string u1, string u2){
         if(a->friends==NULL)
             a->friends=c;
         else{
-            for(k=a->friends;k->next!=NULL;k=k->next)
+            for(k=a->friends;k!=NULL;k=k->next)
                 if(k->data==c->data) break;
-            if(k->data==c->data){
+            if(k!=NULL){
                 delete c;
                 return;
             }
@@ -1106,6 +608,8 @@ void delete_w(Node* O){
     }
 
     delete O->W;
+    O->W=NULL;
+
     if(Wo->left==NULL && Wo->right==NULL){
         delete Wo; Wo=NULL;
     }
@@ -1113,7 +617,121 @@ void delete_w(Node* O){
         delete_one(O);
 } // deleting word from Wo
 
-// path vertex for SCC and shortest path
+Adj* S_P=NULL; // shortest path
+
+// for shortest path coding
+int hsize;
+int curr;
+
+typedef struct heap{
+    int weight;
+    Profile* from;
+    Profile* there;
+} Hnode;
+
+vector <Hnode*> M_HEAP; // HEAP array
+
+int hp(int c){
+    if(c==0) return 0;
+    return (c-1)/2;
+}
+
+int hleft(int c){
+    return 2*c+1;
+}
+
+int hright(int c){
+    return 2*c+2;
+}
+
+void m_swap(int a, int b){
+    Hnode* sw;
+    sw=M_HEAP[a];
+    M_HEAP[a]=M_HEAP[b];
+    M_HEAP[b]=sw;
+}
+
+void hinsert(int val, Profile* P, Profile* from){
+    curr++;
+    if(M_HEAP.size()==0) M_HEAP.reserve(hsize);
+    else if(M_HEAP.capacity() <=curr){
+        hsize*=2;
+        M_HEAP.reserve(hsize);
+    } // realloc if capacity not enough
+
+    Hnode* h=new Hnode;
+    h->from=from;
+    h->there=P;
+    h->weight=val;
+
+    M_HEAP.push_back(h);
+
+    val=curr-1;
+    while(M_HEAP[hp(val)]->weight > M_HEAP[val]->weight)
+        m_swap(hp(val),val), val=hp(val);
+}
+
+void hdelete_top(int F){
+    if(curr==0) return;
+    curr--;
+    m_swap(0,curr);
+
+    delete M_HEAP[curr];
+    M_HEAP.pop_back();
+
+    int val=0;
+    while(F)
+        if(hleft(val) < curr && M_HEAP[val]->weight > M_HEAP[hleft(val)]->weight)
+            m_swap(val, hleft(val)), val=hleft(val);
+        else if(hright(val) < curr && M_HEAP[val]->weight > M_HEAP[hright(val)]->weight)
+            m_swap(val, hright(val)), val=hright(val);
+        else
+            break;
+}
+
+void SHP(Profile* P, int num){
+    if(P==NULL) return;
+
+    if(curr>0){
+        Adj* B=new Adj;
+        B->data=P;
+        B->next=NULL;
+        B->weight=M_HEAP[0]->weight;
+
+        int i;
+
+        if(S_P==NULL){
+            P->from=M_HEAP[0]->from;
+            S_P=B;
+            P->d=num;
+        }
+        else{
+            Adj* A;
+            for(A=S_P, i=1; A->next!=NULL ;i++, A=A->next);
+
+            if(i==5){
+                delete B;
+                return;
+            }
+            P->from=M_HEAP[0]->from;
+            A->next=B;
+            P->d=num;
+        }
+    }
+
+    hdelete_top(1);
+
+    for(Adj* A=P->friends; A!=NULL; A=A->next)
+        if(A->data->d==-1)
+            hinsert(num+A->data->fnum, A->data, P); // shortest path inserting into Min-heap
+
+    for( ; curr>0 && M_HEAP[0]->there->d !=-1 ; hdelete_top(1));
+
+    if(curr==0) return;
+    SHP(M_HEAP[0]->there, M_HEAP[0]->weight);
+}
+
+// path vertex for SCC
 typedef struct pathVertex{
     Adj* link;
     int value;
@@ -1122,20 +740,6 @@ typedef struct pathVertex{
 
 Adj* scc_c=NULL; // SCC vertex
 Path* SCC=NULL; // SCC list
-Path* S_P=NULL; // shortest path
-
-
-// for shortest path coding
-
-
-
-void SHP(Profile* P, int num){
-    if(P==NULL) return;
-    P->d=num;
-    for(Adj* A=P->friends ; A!=NULL ; A=A->next){
-
-    }
-}
 
 // for SCC coding
 void SCC_check(Profile* P){
@@ -1234,12 +838,16 @@ void SCC_K(){
 } //for all nodes in scc_c, extract top 5 SCC.
 
 
+
 // for top5 users, words
 Adjw* top5_w=NULL;
 Adj* top5_p=NULL;
 void top5_word(Node* O){
     if(O==NULL) return;
-    if(topnum>0){
+
+    if(O->W->tweeted==0)
+        delete_w(O); // except tweeted 0.
+    else if(topnum>0){
         Adjw* A=new Adjw;
         A->data=O->W;
         A->next=NULL;
@@ -1543,6 +1151,7 @@ int main(){
 
             Node* x=search_w_s(Wo,name);
             Node* P;
+
             if(x!=NULL && x->W->word.compare(name)==0){
                 for(Adj* A=x->W->tweeters ; A!=NULL ; A=x->W->tweeters){
                     cout<<A->data->name<<endl;
@@ -1551,6 +1160,7 @@ int main(){
 
                     if(P->P->user.compare(A->data->user)==0)
                         delete_p(P);
+
                 }
                 delete_w(x);
             }
@@ -1597,7 +1207,51 @@ int main(){
         }
 
         else if(m==9){
+            cout<< "Enter a word: ";
+            getline(cin, name);
+            cout<< "\nTop 5 Shortest path from " << name <<endl;
 
+            hsize=1000; curr=0;
+            Node* O=search_p_s(Prof,name);
+
+            if(O!=NULL){
+                SHP(O->P,0);
+                O->P->d=-1;
+            }
+            while(curr>0)
+                hdelete_top(0);
+
+            int i=1;
+
+            for(Adj* A=S_P; A!=NULL; A=S_P){
+                S_P=S_P->next;
+                cout<< "\n" << i;
+                if(i==1) cout<<"st";
+                else if(i==2) cout<<"nd";
+                else if(i==3) cout<<"rd";
+                else cout<<"th";
+                cout<<" shortest path" <<endl;
+
+                Profile* B=A->data;
+                B->d=-1;
+
+                while(1){
+                    if(B==A->data)
+                        cout<< B->name <<"(" <<B->user <<") ";
+                    else
+                        cout<< "<- " << B->name <<"(" <<B->user <<") ";
+                    if(B==O->P) break;
+                    B=B->from;
+                }
+                cout<<"\nweight : " << A->weight;
+
+                cout<<"\n";
+                i++;
+                delete A;
+            }
+
+            cout<< "\nPress any key to continue... " <<endl;
+            getch();
         }
 
         else{
